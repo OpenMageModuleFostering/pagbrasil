@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/PagBrasil",
+    "type": "magento-module",
+    "license": "GNU-General-Public-License-(GPL)",
+    "homepage": "",
+    "description": "Gain access to the broadest set of local payment methods, which may immediately multiply your sales in Brazil.",
+    "authors": [
+    {
+        "name": "PagBrasil",
+        "email": "support@pagbrasil.com"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

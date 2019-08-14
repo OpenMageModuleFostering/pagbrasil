@@ -1,0 +1,164 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * Pagbrasil payment module
+ *
+ * @version 1.0
+ * @date 02/13/2014
+ * @author george zheng <xinhaozheng@gmail.com>
+ * @more info available on mzcart.com
+ */
+-->
+<config>
+    <modules>
+        <Mzcart_Pagbrasil>
+            <version>1.0</version>
+        </Mzcart_Pagbrasil>
+    </modules>
+    <global>
+        <models>
+            <pagbrasil>
+                <class>Mzcart_Pagbrasil_Model</class>
+            </pagbrasil>
+        </models>
+        <helpers>
+            <pagbrasil>
+                <class>Mzcart_Pagbrasil_Helper</class>
+            </pagbrasil>
+        </helpers>
+        <resources>
+            <pagbrasil_setup>
+                <setup>
+                    <module>Mzcart_Pagbrasil</module>
+                </setup>
+            </pagbrasil_setup>
+        </resources>
+        <blocks>
+            <pagbrasil><class>Mzcart_Pagbrasil_Block</class></pagbrasil>
+        </blocks>
+
+        <payment>
+            <groups>
+                <pbrasils>PagBrasil</pbrasils>
+            </groups>
+        </payment>
+    </global>
+    <frontend>
+        <secure_url>
+            <pagbrasil_processing>/pagbrasil/processing</pagbrasil_processing>
+        </secure_url>
+        <routers>
+            <pagbrasil>
+                <use>standard</use>
+                <args>
+                    <module>Mzcart_Pagbrasil</module>
+                    <frontName>pagbrasil</frontName>
+                </args>
+            </pagbrasil>
+        </routers>
+        <translate>
+            <modules>
+                <Mzcart_Pagbrasil>
+                    <files>
+                        <default>Mzcart_Pagbrasil.csv</default>
+                    </files>
+                </Mzcart_Pagbrasil>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <pagbrasil>
+                    <file>pagbrasil.xml</file>
+                </pagbrasil>
+            </updates>
+        </layout>
+    </frontend>
+    <admin>
+         <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <pagbrasil after="Mage_Adminhtml">Mzcart_Pagbrasil</pagbrasil>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+    <adminhtml>
+        <translate>
+            <modules>
+                <Mzcart_Pagbrasil>
+                    <files>
+                        <default>Mzcart_Pagbrasil.csv</default>
+                    </files>
+                </Mzcart_Pagbrasil>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <pagbrasil>
+                    <file>pagbrasil.xml</file>
+                </pagbrasil>
+            </updates>
+        </layout>
+        <acl>
+            <resources>
+                <admin>
+                    <children>
+                        <system>
+                            <children>
+                                <config>
+                                    <children>
+                                        <pagbrasil translate="title" module="pagbrasil">
+                                            <title>Pagbrasil Settings</title>
+                                        </pagbrasil>
+                                    </children>
+                                </config>
+                            </children>
+                        </system>
+                    </children>
+                </admin>
+            </resources>
+        </acl>
+    </adminhtml>
+    <default>
+        <payment>
+            <pagbrasil_acc>
+                <group>pbrasils</group>
+                <active>0</active>
+                <model>pagbrasil/acc</model>
+                <title>Visa, Mastercard, Diners, American Express, Hipercard, Elo, Aura</title>
+                <allowspecific>0</allowspecific>
+            </pagbrasil_acc>
+            <pagbrasil_bb>
+                <group>pbrasils</group>
+                <active>0</active>
+                <model>pagbrasil/bb</model>
+                <title>Boleto Banc&#225;rio</title>
+                <allowspecific>1</allowspecific>
+                <specificcountry>BR</specificcountry>
+            </pagbrasil_bb>
+            <pagbrasil_obt>
+                <group>pbrasils</group>
+                <active>0</active>
+                <model>pagbrasil/obt</model>
+                <title>Transfer&#234;ncia Banc&#225;ria (Bradesco, Banco do Brasil, Banrisul)</title>
+                <allowspecific>1</allowspecific>
+                <specificcountry>BR</specificcountry>
+            </pagbrasil_obt>
+        </payment>
+
+    </default>
+</config>

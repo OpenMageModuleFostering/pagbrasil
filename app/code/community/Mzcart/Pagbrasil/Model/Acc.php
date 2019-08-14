@@ -40,7 +40,8 @@ class Mzcart_Pagbrasil_Model_Acc extends Mzcart_Pagbrasil_Model_Abstract
             'pbtoken'			=> Mage::getStoreConfig(Mzcart_Pagbrasil_Helper_Data::XML_PATH_PAGBRASIL_TOKEN, $_order->getStoreId()),
             'cc_installments'	=> 0,			
             'url_return'		=> Mage::getUrl('pagbrasil/processing/return'),	
-			'cc_auth'			=> Mage::getStoreConfig("payment/pagbrasil_acc/preauth") == '1' ? '1' : ''
+			'cc_auth'			=> Mage::getStoreConfig("payment/pagbrasil_acc/preauth") == '1' ? '1' : '',
+			'responsive'		=> '1'
         );
 		$params = array_merge($params, $this->_getCommonFields());
 		return $params;

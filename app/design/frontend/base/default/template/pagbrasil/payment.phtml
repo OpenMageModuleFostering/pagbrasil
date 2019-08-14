@@ -65,10 +65,59 @@ if($this->getPagbrasilMethod() == 'pagbrasil_bb')
 			if($this->getPagbrasilMethod() == 'pagbrasil_acc')
 			{
 			?>
-				<iframe id="tpagbrasilframe" name="tpagbrasilframe" frameborder=0 style="width:100%; height:750px;border:none;background:url(''; " <?php  echo isset($srcstr)?$srcstr:'';?> >
+				<script type="text/javascript">
+				//<![CDATA[
+					function iframeResize()
+					{
+						iframe = document.getElementById("tpagbrasilframe");
+						w = iframe.parentNode.offsetWidth;
+						
+						if(w <= 200) 
+							iframe.style.height = "620px";
+						else if(w <= 220) 
+							iframe.style.height = "595px";
+						else if(w <= 249) 
+							iframe.style.height = "550px";
+						else if(w <= 306)
+							iframe.style.height = "535px";
+						else if(w <= 367)
+							iframe.style.height = "495px";
+						else if(w <= 588)
+							iframe.style.height = "430px";
+						else
+							iframe.style.height = "280px";
+					}
+					window.onresize = function()
+					{
+						iframeResize();
+					}
+				//]]>
+				</script>
+				<iframe id="tpagbrasilframe" name="tpagbrasilframe" frameborder="0" scrolling="no" style="width:100%;border:none;background:url(''); " onload="iframeResize();" >
 					<img src="<?php echo $this->getSkinUrl("images/pagbrasil/loading.gif");?>" />
 				</iframe>
+				<form name="pagbrasil" id="pagbrasil_place_form" target="tpagbrasilframe" action="<?php echo $this->getFormAction();?>" method="POST">
+				<?php
+				if(is_array($this->getFormData()))
+				{
+					foreach ($this->getFormData() as $name => $value)
+					{
+					?>
+						<input type="hidden" name="<?php echo $name; ?>" value="<?php echo $value; ?>"/>
+					<?php
+					}
+					?>
+				<?php
+				}
+				?>
+				</form>
 
+				<script type="text/javascript">
+				//<![CDATA[
+					var paymentform = document.getElementById('pagbrasil_place_form');
+					window.onload = paymentform.submit();
+				//]]>
+				</script>
 			<?php
 			}
 			elseif($this->getPagbrasilMethod() == 'pagbrasil_obt')
@@ -76,38 +125,37 @@ if($this->getPagbrasilMethod() == 'pagbrasil_bb')
 			?>
 				<p><?php echo Mage::helper('pagbrasil')->__("Please select the bank to checkout");?></p>
 				<form name="pagbrasil_obt" id="pagbrasil_obt" action="<?php echo Mage::getUrl('pagbrasil/processing/bank');?>" method="POST">
-				<?php
-				if(is_array($this->getFormData()))
-				{
-					foreach ($this->getFormData() as $name => $value)
+					<?php
+					if(is_array($this->getFormData()))
 					{
-						if ($name == 'payment_method')
+						foreach ($this->getFormData() as $name => $value)
 						{
-							continue;
+							if ($name == 'payment_method')
+							{
+								continue;
+							}
+						?>
+							<input type="hidden" name="<?php echo $name;?>" value="<?php echo $value;?>"/>
+						<?php
 						}
-					?>
-						<input type="hidden" name="<?php echo $name;?>" value="<?php echo $value;?>"/>
+						?>
 					<?php
 					}
 					?>
-				<?php
-				}
-				?>
-				<select name="payment_method" id="payment_method" class="validate-select"> 
-				    <option value=""><?php echo Mage::helper('pagbrasil')->__("Please select your bank");?></option>
-					<?php
-					foreach ($this->getObtBanks() as $k => $v)
-					{
-					?>
-						<option value="<?php echo $k; ?>"><?php echo $v; ?></option> 
-					<?php
-					}
-					?>
-				</select>
-				<br />
-				<br />
-				<input id="paymentbtn" type="submit" value="<?php echo Mage::helper('pagbrasil')->__("Proceed to bank checkout");?>" class="button" />
-				
+					<select name="payment_method" id="payment_method" class="validate-select"> 
+						<option value=""><?php echo Mage::helper('pagbrasil')->__("Please select your bank");?></option>
+						<?php
+						foreach ($this->getObtBanks() as $k => $v)
+						{
+						?>
+							<option value="<?php echo $k; ?>"><?php echo $v; ?></option> 
+						<?php
+						}
+						?>
+					</select>
+					<br />
+					<br />
+					<input id="paymentbtn" type="submit" value="<?php echo Mage::helper('pagbrasil')->__("Proceed to bank checkout");?>" class="button" />
 				</form>
 			   	<script type="text/javascript">
 				//<![CDATA[
@@ -120,38 +168,4 @@ if($this->getPagbrasilMethod() == 'pagbrasil_bb')
 		</td>
     </tr>
 </table>
-
-<?php
-if ($this->getPagbrasilMethod() == 'pagbrasil_acc') //credit card payment
-{
-?>
-	<form name="pagbrasil" id="pagbrasil_place_form" target="tpagbrasilframe" action="<?php echo $this->getFormAction();?>" method="POST">
-	<?php
-	if(is_array($this->getFormData()))
-	{
-	?>
-		<?php
-		foreach ($this->getFormData() as $name => $value)
-		{
-		?>
-			<input type="hidden" name="<?php echo $name; ?>" value="<?php echo $value; ?>"/>
-		<?php
-		}
-		?>
-	<?php
-	}
-	?>
-	</form>
-
-	<script type="text/javascript">
-	//<![CDATA[
-		var paymentform = document.getElementById('pagbrasil_place_form');
-		window.onload = paymentform.submit();
-	//]]>
-	</script>
-
-
-<?php
-}
-?>
 

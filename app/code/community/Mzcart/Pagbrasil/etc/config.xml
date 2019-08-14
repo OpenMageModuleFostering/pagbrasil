@@ -17,14 +17,13 @@
  *
  * @version 1.0
  * @date 02/13/2014
- * @author george zheng <xinhaozheng@gmail.com>
  * @more info available on mzcart.com
  */
 -->
 <config>
     <modules>
         <Mzcart_Pagbrasil>
-            <version>1.0</version>
+            <version>2.2.0</version>
         </Mzcart_Pagbrasil>
     </modules>
     <global>
@@ -138,6 +137,7 @@
             <pagbrasil_acc>
                 <group>pbrasils</group>
                 <active>0</active>
+				<preauth>0</preauth>
                 <model>pagbrasil/acc</model>
                 <title>Visa, Mastercard, Diners, American Express, Hipercard, Elo, Aura</title>
                 <allowspecific>0</allowspecific>

@@ -17,7 +17,6 @@
  *
  * @version 1.0
  * @date 02/13/2014
- * @author george zheng <xinhaozheng@gmail.com>
  * @more info available on mzcart.com
  */
 -->
@@ -78,6 +77,17 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </active>
+						<preauth translate="label">
+                            <label>Pre-authorize only</label>
+							<comment>IMPORTANT: If you activate this option you will need to manually capture each transaction at the PagBrasil Merchant Interface. Pre-authorizations that are not captured will expire after 4 days.</comment>
+                            <frontend_type>select</frontend_type>
+                            <config_path>payment/pagbrasil_acc/preauth</config_path>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </preauth>
                         <sort_order translate="label">
                             <label>Sort Order</label>
                             <frontend_type>text</frontend_type>

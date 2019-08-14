@@ -26,7 +26,8 @@ class Mzcart_Pagbrasil_Model_Event
     const PAGBRASIL_STATUS_FAIL = -2;
     const PAGBRASIL_STATUS_CANCEL = -1;
     const PAGBRASIL_STATUS_PENDING = 0;
-    const PAGBRASIL_STATUS_SUCCESS = 2;
+    const PAGBRASIL_STATUS_PRE_AUTHORIZE = 1;
+	const PAGBRASIL_STATUS_SUCCESS = 2;
 
     /*
      * @param Mage_Sales_Model_Order
@@ -80,10 +81,12 @@ class Mzcart_Pagbrasil_Model_Event
      */
     public function processStatusEvent($check=true)
     {
-        try {
+        try
+		{
             $params = $this->_validateEventData($check);
             $msg = '';
-            switch($params['status']) {
+            switch($params['status'])
+			{
                 case self::PAGBRASIL_STATUS_FAIL: //fail
                     $msg = Mage::helper('pagbrasil')->__('Payment failed.');
                     $this->_processCancel($msg);
@@ -96,15 +99,23 @@ class Mzcart_Pagbrasil_Model_Event
                     $msg = Mage::helper('pagbrasil')->__('Pending order #%s created.', $params['order']);
                     $this->_processSale($params['status'], $msg);
                     break;
+				case self::PAGBRASIL_STATUS_PRE_AUTHORIZE: //Pre-authorize
+                    $msg = Mage::helper('pagbrasil')->__('Payment pre-authorized but not captured yet.', $params['order']);
+                    $this->_processSale($params['status'], $msg);
+                    break;
                 case self::PAGBRASIL_STATUS_SUCCESS: //ok
                     $msg = Mage::helper('pagbrasil')->__('Payment authorized.');
                     $this->_processSale($params['status'], $msg);
                     break;
             }
             return $msg;
-        } catch (Mage_Core_Exception $e) {
+        }
+		catch (Mage_Core_Exception $e)
+		{
             return $e->getMessage();
-        } catch(Exception $e) {
+        }
+		catch(Exception $e)
+		{
             Mage::logException($e);
         }
         return;
@@ -167,6 +178,7 @@ class Mzcart_Pagbrasil_Model_Event
                 $this->_order->sendNewOrderEmail();
                 $this->_order->setEmailSent(true);
                 break;
+			case self::PAGBRASIL_STATUS_PRE_AUTHORIZE:
             case self::PAGBRASIL_STATUS_PENDING:
                 $this->_order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true, $msg);
                 // save transaction ID

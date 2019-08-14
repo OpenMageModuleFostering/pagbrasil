@@ -16,7 +16,6 @@
  *
  * @version 1.0
  * @date 02/13/2014
- * @author george zheng <xinhaozheng@gmail.com>
  * @more info available on mzcart.com
  */
 class Mzcart_Pagbrasil_Model_Bb extends Mzcart_Pagbrasil_Model_Abstract {
@@ -49,11 +48,16 @@ class Mzcart_Pagbrasil_Model_Bb extends Mzcart_Pagbrasil_Model_Abstract {
      *
      * @return array
      */
-    public function getBolUrl() {
-	    $params = $this->getFormFields();
+    public function getBolUrl()
+	{
+	    $_order = $this->getOrder();
+		//$order_id = $_order->getRealOrderId();
+		
+		$params = $this->getFormFields();
 		$curl = curl_init($this->getUrl());
 		$request = '';
-		foreach($params as $k => $v) {
+		foreach($params as $k => $v)
+		{
 			$request .= $k . '=' . trim($v) . '&';			
 		}
 		
@@ -64,9 +68,15 @@ class Mzcart_Pagbrasil_Model_Bb extends Mzcart_Pagbrasil_Model_Abstract {
 		curl_setopt($curl, CURLOPT_TIMEOUT, 50);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		$response = curl_exec($curl);
-        if (substr($response, 0, 7) == 'http://' ) {
-		    return $response;
-		} else {
+        if (substr($response, 0, 7) == 'http://' )
+		{
+		    $msg = Mage::helper('pagbrasil')->__('Boleto issued and waiting for payment.');
+			$_order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true, $msg);
+			$_order->save();
+			return $response;
+		}
+		else
+		{
 		    return false;
 		}
     }	

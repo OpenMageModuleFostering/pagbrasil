@@ -26,46 +26,83 @@
 ?>
 <?php 
 // var_dump($this->getPagbrasilMethod());
-if($this->getPagbrasilMethod() == 'pagbrasil_bb') {
+if($this->getPagbrasilMethod() == 'pagbrasil_bb')
+{
   $bburl = $this->getBbUrl();
   $srcstr = ($bburl == false) ? '' : $bburl;
-  // var_dump($srcstr);
+  //var_dump($srcstr);
 }
 ?>
 <div class="page-head">
     <h3>
-	<?php if($this->getPagbrasilMethod() == 'pagbrasil_bb') { ?>
-    <a href="<?php echo $srcstr ?>" target="_blank"><?php echo Mage::helper('pagbrasil')->__('Please click here to view or print your boleto bancario'); ?></a>
-	<?php } else { echo Mage::helper('pagbrasil')->__('Payment'); } ?>
+	<?php
+	if($this->getPagbrasilMethod() == 'pagbrasil_bb')
+	{
+		if($srcstr != '')
+		{
+	?>
+			<a href="<?php echo $srcstr ?>" target="_blank"><?php echo Mage::helper('pagbrasil')->__('Please click here to view or print your boleto bancario'); ?></a>
+	<?php
+		}
+		else
+		{
+		?>
+			<p><?php echo Mage::helper('pagbrasil')->__('An error occurred while generating the boleto bancario.'); ?></p>
+		<?php
+		}
+	}
+	else
+	{
+		echo Mage::helper('pagbrasil')->__('Payment');
+	}
+	?>
 	</h3>
 </div>
 <table style="width:100%;">
     <tr>
         <td style="width:75%">
-		    <?php if($this->getPagbrasilMethod() == 'pagbrasil_acc') { ?>
-			
+		    <?php
+			if($this->getPagbrasilMethod() == 'pagbrasil_acc')
+			{
+			?>
 				<iframe id="tpagbrasilframe" name="tpagbrasilframe" frameborder=0 style="width:100%; height:750px;border:none;background:url(''; " <?php  echo isset($srcstr)?$srcstr:'';?> >
-				<img src="<?php echo $this->getSkinUrl("images/pagbrasil/loading.gif");?>" />
+					<img src="<?php echo $this->getSkinUrl("images/pagbrasil/loading.gif");?>" />
 				</iframe>
 
-			<?php } elseif($this->getPagbrasilMethod() == 'pagbrasil_obt') { ?>
-			
-			    <p/>
-			    <p/>
-			    <p/>
+			<?php
+			}
+			elseif($this->getPagbrasilMethod() == 'pagbrasil_obt')
+			{
+			?>
 				<p><?php echo Mage::helper('pagbrasil')->__("Please select the bank to checkout");?></p>
-				<form name="pagbrasil_obt" id="pagbrasil_obt" action="<?php echo Mage::getUrl('pagbrasil/processing/bank') ?>" method="POST">
-				<?php if (is_array($this->getFormData())): ?>
-					<?php foreach ($this->getFormData() as $name => $value): ?>
-						<?php if ($name == 'payment_method') continue; ?>
-						<input type="hidden" name="<?php echo $name; ?>" value="<?php echo $value; ?>"/>
-					<?php endforeach; ?>
-				<?php endif; ?>
+				<form name="pagbrasil_obt" id="pagbrasil_obt" action="<?php echo Mage::getUrl('pagbrasil/processing/bank');?>" method="POST">
+				<?php
+				if(is_array($this->getFormData()))
+				{
+					foreach ($this->getFormData() as $name => $value)
+					{
+						if ($name == 'payment_method')
+						{
+							continue;
+						}
+					?>
+						<input type="hidden" name="<?php echo $name;?>" value="<?php echo $value;?>"/>
+					<?php
+					}
+					?>
+				<?php
+				}
+				?>
 				<select name="payment_method" id="payment_method" class="validate-select"> 
 				    <option value=""><?php echo Mage::helper('pagbrasil')->__("Please select your bank");?></option>
-					<?php foreach ($this->getObtBanks() as $k => $v): ?>
+					<?php
+					foreach ($this->getObtBanks() as $k => $v)
+					{
+					?>
 						<option value="<?php echo $k; ?>"><?php echo $v; ?></option> 
-					<?php endforeach; ?>
+					<?php
+					}
+					?>
 				</select>
 				<br />
 				<br />
@@ -77,22 +114,33 @@ if($this->getPagbrasilMethod() == 'pagbrasil_bb') {
 					var dataForm = new VarienForm('pagbrasil_obt', true);
 				//]]>
 				</script>
-			<?php } ?>
-			
-			
-        </td>
+			<?php
+			}
+			?>
+		</td>
     </tr>
 </table>
 
-<?php if ($this->getPagbrasilMethod() == 'pagbrasil_acc') { //credit card payment ?>
-
-
+<?php
+if ($this->getPagbrasilMethod() == 'pagbrasil_acc') //credit card payment
+{
+?>
 	<form name="pagbrasil" id="pagbrasil_place_form" target="tpagbrasilframe" action="<?php echo $this->getFormAction();?>" method="POST">
-	<?php if (is_array($this->getFormData())): ?>
-		<?php foreach ($this->getFormData() as $name => $value): ?>
+	<?php
+	if(is_array($this->getFormData()))
+	{
+	?>
+		<?php
+		foreach ($this->getFormData() as $name => $value)
+		{
+		?>
 			<input type="hidden" name="<?php echo $name; ?>" value="<?php echo $value; ?>"/>
-		<?php endforeach; ?>
-	<?php endif; ?>
+		<?php
+		}
+		?>
+	<?php
+	}
+	?>
 	</form>
 
 	<script type="text/javascript">
@@ -103,5 +151,7 @@ if($this->getPagbrasilMethod() == 'pagbrasil_bb') {
 	</script>
 
 
-<?php } ?>
+<?php
+}
+?>
 

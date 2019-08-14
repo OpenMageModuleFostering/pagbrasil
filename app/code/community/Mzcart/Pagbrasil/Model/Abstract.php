@@ -16,7 +16,6 @@
  *
  * @version 1.0
  * @date 02/13/2014
- * @author george zheng <xinhaozheng@gmail.com>
  * @more info available on mzcart.com
  */
 abstract class Mzcart_Pagbrasil_Model_Abstract extends Mage_Payment_Model_Method_Abstract
@@ -28,7 +27,7 @@ abstract class Mzcart_Pagbrasil_Model_Abstract extends Mage_Payment_Model_Method
 
     protected $_formBlockType = 'pagbrasil/form';
     protected $_infoBlockType = 'pagbrasil/info';
-
+	
     /**
      * Availability options
      */
@@ -183,7 +182,7 @@ abstract class Mzcart_Pagbrasil_Model_Abstract extends Mage_Payment_Model_Method
             'address_zip'           => preg_replace('/[^0-9]+/', '',$billing->getPostcode()),
             'address_city'          => $billing->getCity(),
             'address_state'         => $billing->getRegionCode(),
-            'amount_brl'            => $amount,
+            'amount_brl'            => $amount
         );
 		return $params;
     }

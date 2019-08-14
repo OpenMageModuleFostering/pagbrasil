@@ -16,7 +16,6 @@
  *
  * @version 1.0
  * @date 02/13/2014
- * @author george zheng <xinhaozheng@gmail.com>
  * @more info available on mzcart.com
  */
 class Mzcart_Pagbrasil_Model_Acc extends Mzcart_Pagbrasil_Model_Abstract
@@ -32,17 +31,19 @@ class Mzcart_Pagbrasil_Model_Acc extends Mzcart_Pagbrasil_Model_Abstract
      *
      * @return array
      */
-    public function getFormFields() {
+    public function getFormFields()
+	{
 	    $_order = $this->getOrder();
 		// $order_id = $_order->getRealOrderId();
-        $params = array(
+        $params = array
+		(
             'pbtoken'			=> Mage::getStoreConfig(Mzcart_Pagbrasil_Helper_Data::XML_PATH_PAGBRASIL_TOKEN, $_order->getStoreId()),
             'cc_installments'	=> 0,			
             'url_return'		=> Mage::getUrl('pagbrasil/processing/return'),	
-            // 'url_return'		=> Mage::getUrl('pagbrasil/processing/return', array('order' => $order_id)),	
-		);
+			'cc_auth'			=> Mage::getStoreConfig("payment/pagbrasil_acc/preauth") == '1' ? '1' : ''
+        );
 		$params = array_merge($params, $this->_getCommonFields());
-        return $params;
+		return $params;
     }
 	
     /**

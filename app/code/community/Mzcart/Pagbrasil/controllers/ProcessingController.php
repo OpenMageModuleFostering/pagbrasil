@@ -16,7 +16,6 @@
  *
  * @version 1.0
  * @date 02/13/2014
- * @author george zheng <xinhaozheng@gmail.com>
  * @more info available on mzcart.com
  */
 class Mzcart_Pagbrasil_ProcessingController extends Mage_Core_Controller_Front_Action
@@ -58,10 +57,13 @@ class Mzcart_Pagbrasil_ProcessingController extends Mage_Core_Controller_Front_A
 			$billing  = $order ->getBillingAddress();
 			$vatid = $billing->getVatId();
 			
-			if ($this -> _validaCPF($vatid) || $this -> _validaCNPJ($vatid) ) {
+			if($this -> _validaCPF($vatid) || $this -> _validaCNPJ($vatid))
+			{
 				// $session->addError(Mage::helper('pagbrasil')->__('The CPF OR CNPJ is valid!'));
 				// Mage::throwException(Mage::helper('pagbrasil')->__('The CPF OR CNPJ is valid!'));
-			} else {
+			}
+			else
+			{
 			    Mage::getModel('sales/quote')->load($session->getQuoteId())->setIsActive(true)->save(); 
 			    $session->addError(Mage::helper('pagbrasil')->__('The CPF or CNPJ is not valid!'));
 				//parent::_redirect('checkout/cart');
@@ -69,19 +71,30 @@ class Mzcart_Pagbrasil_ProcessingController extends Mage_Core_Controller_Front_A
 				// exit();
 				Mage::throwException(Mage::helper('pagbrasil')->__('The CPF or CNPJ is not valid!'));
 			}
-			$order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, Mage_Sales_Model_Order::STATE_PENDING_PAYMENT,
-				Mage::helper('pagbrasil')->__('The customer was redirected to PagBrasil.')
-			);
-			$order->save();
+			
+			
+			
+			if($order->getState() != "pending_payment")
+			{
+				parent::_redirect('checkout/cart');
+				//die();
+			}
+			else
+			{
+				$order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, Mage_Sales_Model_Order::STATE_PENDING_PAYMENT,
+					Mage::helper('pagbrasil')->__('The customer was redirected to PagBrasil.')
+				);
+				$order->save();
 
-            $session->setPagbrasilQuoteId($session->getQuoteId());
-            $session->setPagbrasilRealOrderId($session->getLastRealOrderId());
-            $session->getQuote()->setIsActive(true)->save();
-            //$session->getQuote()->setIsActive(false)->save();
-            //$session->clear();
+				$session->setPagbrasilQuoteId($session->getQuoteId());
+				$session->setPagbrasilRealOrderId($session->getLastRealOrderId());
+				$session->getQuote()->setIsActive(true)->save();
+				//$session->getQuote()->setIsActive(false)->save();
+				//$session->clear();
 
-            $this->loadLayout();
-            $this->renderLayout();
+				$this->loadLayout();
+				$this->renderLayout();
+			}
         } catch (Exception $e){
             Mage::logException($e);
             parent::_redirect('checkout/cart');
@@ -91,14 +104,25 @@ class Mzcart_Pagbrasil_ProcessingController extends Mage_Core_Controller_Front_A
 	/**
      * Obt:Action to which the customer will be returned when the payment is made.
      */
-    public function bankAction() {
+    public function bankAction()
+	{
 	    $session = $this->_getCheckout();
 	    $session->getQuote()->setIsActive(true)->save();
 	    $curl = curl_init('https://www.pagbrasil.com/pagbrasil/addorder.mv');
 		$request = '';
 		// $pm = '';$url = '';
 		$params = $this->getRequest()->getParams();
-		foreach($params as $k => $v) {
+		if (isset($params['order']))
+		{
+			$order_id = trim($params['order']);
+		}
+		else
+		{
+			die('Illegal Access');
+		}
+		$_order = Mage::getModel('sales/order')->loadByIncrementId($order_id);
+		foreach($params as $k => $v)
+		{
 		    // if ($k == 'payment_method') {
 			    // $pm = trim($v);
 			// }
@@ -128,37 +152,46 @@ class Mzcart_Pagbrasil_ProcessingController extends Mage_Core_Controller_Front_A
 		error_log("\n" . $response . "\n",3,'logfile');
 		$msg = '';
 		$ok = 0;
-		if ($response!= false && substr($response, 0, 7) == 'http://' ) {
+		if ($response!= false && substr($response, 0, 7) == 'http://' )
+		{
 			$ok = 1;
-		} else {
-		    
 		}
 		
-		if ($ok ==1) {
-			$ok=header('Location: ' . $response);
-			exit;
-		} else {
-		    $this->_redirect('checkout/onepage/success');
+		if ($ok == 1)
+		{
+			$msg = Mage::helper('pagbrasil')->__('The customer was redirected to bank.');
+			$_order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true, $msg);
+			$_order->save();
+			$ok = header('Location: ' . $response);
+			die();
 		}
-	
-    }
+		else
+		{
+		    parent::_redirect('checkout/cart');
+		}
+	}
 	
 	
 	/**
      * Cc(if mode)/Obt:Action to which the customer will be returned when the payment is made.
      */
-    public function returnAction() {
+    public function returnAction()
+	{
 	    // error_log(print_r($params,1),3,'abc');
 	    $params = $this->getRequest()->getParams();
-		if (isset($params['order'])) {
+		if (isset($params['order']))
+		{
 			$order_id = trim($params['order']);
-		} else {
+		}
+		else
+		{
 			die('Illegal Access');
 		}
 		
 		$_order = Mage::getModel('sales/order')->loadByIncrementId($order_id);
 		
-		if (!$_order->getId()) {
+		if (!$_order->getId())
+		{
             Mage::throwException('Order not found.');
         }
 		
@@ -179,15 +212,16 @@ class Mzcart_Pagbrasil_ProcessingController extends Mage_Core_Controller_Front_A
 		$xml = new DOMDocument();
 		$xml->loadXML($response);
 		
-		if ( isset($xml->getElementsByTagName('order_status')->item(0)->nodeValue)) {
+		if ( isset($xml->getElementsByTagName('order_status')->item(0)->nodeValue))
+		{
 			$payment_status = $xml->getElementsByTagName('order_status')->item(0)->nodeValue;
-
-			switch ($payment_status) {
-				case 'PC':$params['status'] = 2;break;
-				case 'PA':$params['status'] = 0;break;
-				case 'WP':$params['status'] = 0;break;
-				case 'PF':$params['status'] = -2;break;
-				case 'PR':$params['status'] = -2;break;
+			switch ($payment_status)
+			{
+				case 'PC':$params['status'] = 2; break;
+				case 'PA':$params['status'] = 1; break;
+				case 'WP':$params['status'] = 0; break;
+				case 'PF':$params['status'] = -2; break;
+				case 'PR':$params['status'] = -2; break;
 			}
 		}	
 		// var_dump($params);exit;
@@ -199,13 +233,23 @@ class Mzcart_Pagbrasil_ProcessingController extends Mage_Core_Controller_Front_A
 		$event = Mage::getModel('pagbrasil/event')->setEventData($params);
 		$message = $event->processStatusEvent(false);
 		//var_dump($params);exit;
-		if ( $params['status'] != 2) {
-		    $session->addError($message);
-			Mage::getModel('sales/quote')->load($session->getQuoteId())->setIsActive(true)->save(); 
+		if($params['status'] < 1)
+		{
+		    if($params["payment_method"] != "R" && $params["payment_method"] != "E" && $params["payment_method"] != "S")
+			{
+				$session->addError($message);
+			}
+			//Mage::getModel('sales/quote')->load($session->getQuoteId())->setIsActive(true)->save(); 
             $this->_redirect('checkout/cart');
 			//exit();
-		} else {
-		    $quoteId = $event->successEvent();
+		}
+		elseif($params['status'] == 1)
+		{
+			$this->_redirect('checkout/onepage/success');
+		}
+		else
+		{
+			$quoteId = $event->successEvent();
             $this->_getCheckout()->setLastSuccessQuoteId($quoteId);
 			// var_dump($session->getQuoteId());exit;
 			// var_dump($quoteId);exit;
@@ -217,38 +261,44 @@ class Mzcart_Pagbrasil_ProcessingController extends Mage_Core_Controller_Front_A
 		}
 		//need a temp
 		//check the status action temp
-		
-		
-    }
+	}
 	
 	/**
      * Action to which the customer will be returned when the payment is made.
      */
-    public function postbackAction() {
+    public function postbackAction()
+	{
 	    $params = $this->getRequest()->getParams();
 		
 		error_log(print_r($params,1) . "\n\n",3,'logfile');
-// $params =array(
-    // 'payment_method' => 'B',
-    // 'secret' => 'b1299d4c01b127f02851e3b726b75675615f8081',
-    // 'content' => '<boletos_list><boleto><order>100000033</order><payment_date>02/17/2014</payment_date><amount_paid>12.05</amount_paid><amount_due>12.05</amount_due><param_url>order=100000033</param_url></boleto></boletos_list>'
-// );
+		/*
+		$params =array(
+			'payment_method' => 'B',
+			'secret' => 'b1299d4c01b127f02851e3b726b75675615f8081',
+			'content' => '<boletos_list><boleto><order>100000033</order><payment_date>02/17/2014</payment_date><amount_paid>12.05</amount_paid><amount_due>12.05</amount_due><param_url>order=100000033</param_url></boleto></boletos_list>'
+		);
+		*/
 		
-		if (isset($params['secret'])) {
+		if (isset($params['secret']))
+		{
 			$secret = trim($params['secret']);
-		} else {
+		}
+		else
+		{
 			die('Illegal Access');
 		}
 		
 		$payment_method = trim($params['payment_method']);
-		switch($payment_method) {
+		switch($payment_method)
+		{
 			case 'B':
 				$content = trim(preg_replace('/\s+/', '',$params['content']));
 				$xml = new DOMDocument();
-$content = str_replace('<br />','',nl2br($content));
+				$content = str_replace('<br />','',nl2br($content));
 				$xml->loadXML($content);
 				$boletolist = $xml->getElementsByTagName('boleto');
-				foreach ($boletolist as $boleto) {						
+				foreach ($boletolist as $boleto)
+				{						
 					$order_id = trim($boleto->childNodes->item(0)->nodeValue);
 					
 					$_order = Mage::getModel('sales/order')->loadByIncrementId($order_id);
@@ -257,7 +307,8 @@ $content = str_replace('<br />','',nl2br($content));
 						Mage::throwException('Order not found.');
 					}
 					$secret2 = Mage::getStoreConfig(Mzcart_Pagbrasil_Helper_Data::XML_PATH_SECRET_KEY, $_order->getStoreId());
-					if ($secret != $secret2) {
+					if ($secret != $secret2)
+					{
 						die('Illegal Access');
 					}
 				
@@ -265,55 +316,63 @@ $content = str_replace('<br />','',nl2br($content));
 					$amount_due = trim($boleto->childNodes->item(3)->nodeValue);
 					$amount_brl = $amount_paid;
 					
-					if ($amount_paid == $amount_due ) {
+					if ($amount_paid == $amount_due )
+					{
 						$msg = Mage::helper('pagbrasil')->__('The order was paid.');
 						$_order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true, $msg);
 						$_order->save();
 						$_order->getPayment()->setLastTransId($order_id);
 						$_order->sendNewOrderEmail();
 						$_order->setEmailSent(true);
-					} else {
-						$msg = Mage::helper('pagbrasil')->__('The order was partialy paid.Amount Due: %s, ,Amount Paid: %s.');
+					}
+					else 
+					{
+						$msg = Mage::helper('pagbrasil')->__('The order was partialy paid. Amount Due: %s, Amount Paid: %s.');
 						$msg = sprintf($msg, $amount_due, $amount_paid);
 						$_order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true, $msg);
 						$_order->getPayment()->setLastTransId($order_id);
 					}
 					$_order->save();
 				}
-				
-				
 				break;
 			default:
 				$payment_status = $params['payment_status'];
-				switch ($payment_status) {
-					case 'A':$params['status'] = 2;break;
-					case 'F':$params['status'] = -2;break;
-					case 'R':$params['status'] = 0;break;
-					case 'C':$params['status'] = -1;break;
-					case 'P':$params['status'] = -1;break;
+				switch ($payment_status)
+				{
+					case 'A':$params['status'] = $params['cc_auth'] == 1 ? 1 : 2; break;
+					case 'F':$params['status'] = -2; break;
+					case 'R':$params['status'] = 0; break;
+					case 'C':$params['status'] = -1; break;
+					case 'P':$params['status'] = -1; break;
 				}					
 				$event = Mage::getModel('pagbrasil/event')->setEventData($params);
 				$message = $event->processStatusEvent();
 		}
     
-		echo 'Received successfully in [' . time() . ']';	 
-        exit;		
+		echo 'Received successfully in '.time();
+        die();
     }	
 
     /**
      * Obt:Action to which the customer will be returned when the payment is made.
      */
-    public function successAction() {
+    public function successAction()
+	{
         $event = Mage::getModel('pagbrasil/event')
                  ->setEventData($this->getRequest()->getParams());
-        try {
+        try
+		{
             $quoteId = $event->successEvent();
             $this->_getCheckout()->setLastSuccessQuoteId($quoteId);
             $this->_redirect('checkout/onepage/success');
             return;
-        } catch (Mage_Core_Exception $e) {
+        }
+		catch (Mage_Core_Exception $e)
+		{
             $this->_getCheckout()->addError($e->getMessage());
-        } catch(Exception $e) {
+        }
+		catch(Exception $e)
+		{
             Mage::logException($e);
         }
         $this->_redirect('checkout/cart');
@@ -374,60 +433,94 @@ $content = str_replace('<br />','',nl2br($content));
         return $this;
     }
 	
-	function _validaCPF($cpf) { 
+	function _validaCPF($cpf)
+	{ 
 		$tam_cpf = strlen($cpf); 
 		$cpf_limpo = "";
-		for ($i=0; $i<$tam_cpf; $i++) { 
-		  $carac = substr($cpf, $i, 1); 
-		  if (ord($carac)>=48 && ord($carac)<=57) // verifica se o codigo asc refere-se a 0-9 
-			$cpf_limpo .= $carac; 
+		for ($i=0; $i<$tam_cpf; $i++)
+		{ 
+			$carac = substr($cpf, $i, 1); 
+			if (ord($carac)>=48 && ord($carac)<=57)
+			{
+				$cpf_limpo .= $carac; 
+			}
 		} 
-		if (strlen($cpf_limpo)!=11) 
-		  return false; 
+		if (strlen($cpf_limpo)!=11)
+		{
+			return false;
+		}
 
+		for($i = 0; $i <= 9; $i++)
+		{
+			if(str_repeat($i, 11) == $cpf_limpo)
+			{
+				return false;
+			}
+		}
+		
 		// achar o primeiro digito verificador 
 		$soma = 0; 
-		for ($i=0; $i<9; $i++) 
-		  $soma += (int)substr($cpf_limpo, $i, 1) * (10-$i); 
+		for ($i=0; $i<9; $i++)
+		{
+			$soma += (int)substr($cpf_limpo, $i, 1) * (10-$i); 
+		}
 
-		if ($soma == 0) 
-		  return false; 
+		if ($soma == 0)
+		{
+			return false;
+		}  
 
 		$primeiro_digito = 11 - $soma % 11; 
 
-		if ($primeiro_digito > 9) 
-		  $primeiro_digito = 0; 
+		if ($primeiro_digito > 9)
+		{
+			$primeiro_digito = 0;
+		}
 
-		if (substr($cpf_limpo, 9, 1) != $primeiro_digito) 
-		  return false; 
+		if (substr($cpf_limpo, 9, 1) != $primeiro_digito)
+		{
+			return false;
+		}
 
 		// acha o segundo digito verificador 
 		$soma = 0; 
-		for ($i=0; $i<10; $i++) 
-		  $soma += (int)substr($cpf_limpo, $i, 1) * (11-$i); 
+		for ($i=0; $i<10; $i++)
+		{
+			$soma += (int)substr($cpf_limpo, $i, 1) * (11-$i); 
+		}
 
 		$segundo_digito = 11 - $soma % 11; 
 
-		if ($segundo_digito > 9) 
-		  $segundo_digito = 0; 
+		if ($segundo_digito > 9)
+		{
+			$segundo_digito = 0; 
+		}
 
-		if (substr($cpf_limpo, 10, 1) != $segundo_digito) 
-		  return false; 
+		if (substr($cpf_limpo, 10, 1) != $segundo_digito)
+		{
+			return false;
+		}
 
 		return true; 
 	} 
 
 
-	function _validaCNPJ($cnpj) {
+	function _validaCNPJ($cnpj)
+	{
 		$pontos = array(',','-','.','','/');
 		
 		$cnpj = str_replace($pontos,'',$cnpj);
 		$cnpj = trim($cnpj);
-		if(empty($cnpj) || strlen($cnpj) != 14) return FALSE;
-		else {
+		if(empty($cnpj) || strlen($cnpj) != 14)
+		{
+			return false;
+		}
+		else
+		{
 			$rev_cnpj = strrev(substr($cnpj, 0, 12));
 			$sum = '';
-			for ($i = 0; $i <= 11; $i++) {
+			for ($i = 0; $i <= 11; $i++)
+			{
 				$i == 0 ? $multiplier = 2 : $multiplier;
 				$i == 8 ? $multiplier = 2 : $multiplier;
 				$multiply = ($rev_cnpj[$i] * $multiplier);
@@ -443,21 +536,26 @@ $content = str_replace('<br />','',nl2br($content));
 			$rev_cnpj = strrev($sub_cnpj.$dv1);
 			unset($sum);
 			$sum = '';
-			for ($i = 0; $i <= 12; $i++) {
+			for ($i = 0; $i <= 12; $i++)
+			{
 				$i == 0 ? $multiplier = 2 : $multiplier;
 				$i == 8 ? $multiplier = 2 : $multiplier;
 				$multiply = ($rev_cnpj[$i] * $multiplier);
 				$sum = $sum + $multiply;
 				$multiplier++;
-
 			}
 			$rest = $sum % 11;
 			if ($rest == 0 || $rest == 1)  $dv2 = 0;
 			else $dv2 = 11 - $rest;
 
-			if ($dv1 == $cnpj[12] && $dv2 == $cnpj[13]) return true; //$cnpj;
-			else return false;
+			if ($dv1 == $cnpj[12] && $dv2 == $cnpj[13])
+			{
+				return true; //$cnpj;
+			}
+			else
+			{
+				return false;
+			}
 		}
 	}
-	
 }

@@ -16,7 +16,6 @@
  *
  * @version 1.0
  * @date 02/13/2014
- * @author george zheng <xinhaozheng@gmail.com>
  * @more info available on mzcart.com
  */
 class Mzcart_Pagbrasil_Model_Obt extends Mzcart_Pagbrasil_Model_Abstract

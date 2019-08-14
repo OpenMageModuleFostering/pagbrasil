@@ -102,9 +102,23 @@ if($this->getPagbrasilMethod() == 'pagbrasil_bb')
 				{
 					foreach ($this->getFormData() as $name => $value)
 					{
-					?>
-						<input type="hidden" name="<?php echo $name; ?>" value="<?php echo $value; ?>"/>
-					<?php
+						if($name == "responsive")
+						{
+						?>
+							<!--[if lt IE 9]>
+								<input type="hidden" name="<?php echo $name; ?>" value="0"/>
+							<![endif]-->
+							<!--[if (gte IE 9)|!(IE)]><!-->
+								<input type="hidden" name="<?php echo $name; ?>" value="<?php echo $value; ?>"/>
+							<!--<![endif]-->
+						<?php
+						}
+						else
+						{
+						?>
+							<input type="hidden" name="<?php echo $name; ?>" value="<?php echo $value; ?>"/>
+						<?php
+						}
 					}
 					?>
 				<?php
